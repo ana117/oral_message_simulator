@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Oral Message Simulator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+    <link href="{% static 'oral_message/css/index.css' %}" rel="stylesheet">
+  </head>
+  <body class="bg-dark-subtle d-flex flex-column justify-content-center">
+    <h3 class="text-center m-3"><strong>Oral Message Simulator</strong></h3>
+    
+    <div class="container">
+        <div class="row">
+            <section class="col-xl-6 col-sm-12" style="height: 80vh;">
+                <div class="card shadow bg-body-tertiary rounded h-100">
+                    <div class="card-body p-5 h-100">
+            
+                        <!-- Total Node Count -->
+                        <div class="row">
+                            <div class="col-auto">
+                                <label for="" class="col-form-label"><strong>Jumlah Node</strong></label>
+                            </div>
+                            <div class="col">
+                                <input type="number" name="" id="num-field" class="form-control border border-2 border-dark" value="4", min="1">
+                            </div>
+                        </div>
+                        <!-- Total Node Count -->
+            
+            
+                        <!-- Byzantine Node Selection -->
+                        <div class="mt-3" style="height: 60%">
+                            <h5>Byzantine Node (<span id="byz-count">0</span>/<span id="node-count">4</span>)</h5>
+                            <h6 id="byz-warn" hidden style="color:red;font-weight: bold;">3m + 1 total node tidak terpenuhi, hasil konsensus TIDAK dijamin valid</h6>
+
+                            <div class="container border border-3 border-dark py-1 px-3 overflow-y-scroll" style="height: 90%">
+                                <div class="row row-cols-2 g-2" id="node-inp-container">
+                                </div>                             
+                            </div>
+                        </div>
+                        <!-- Byzantine Node Selection -->
+            
+            
+                        <!-- Attack / Retreat -->
+                        <div class="container mt-5">
+                            <div class="row">
+                                <div class="col border border-3 border-dark me-5 py-2">
+                                    <div class="form-check form-check-reverse text-start">
+                                        <input class="form-check-input" type="radio" name="action-radio" id="attack" checked>
+                                        <label class="form-check-label fw-bold w-100" for="attack">
+                                            Attack
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                
+                                <div class="col border border-3 border-dark ms-5 py-2">
+                                    <div class="form-check form-check-reverse text-start">
+                                        <input class="form-check-input" type="radio" name="action-radio" id="retreat">
+                                        <label class="form-check-label fw-bold w-100" for="retreat">
+                                            Retreat
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        <!-- Attack / Retreat -->
+            
+            
+                        <!-- Button -->
+                        <div class="mt-3">
+                            <div class="d-flex justify-content-center">
+                                <button type="button" class="btn btn-dark btn-lg btn-block px-5" id="start-btn">Start</button>
+                            </div>
+                        </div>  
+            
+                    </div>
+                </div>
+            </section>
+
+            <section class="col-xl-6 col-sm-12 my-sm-5 my-xl-0" style="height: 80vh;">
+                <div class="card shadow rounded h-100">
+                    <div class="card-body p-5 h-100">
+                        <h4 class="text-center">Hasil Simulasi</h4>
+
+                        <div class="d-flex justify-content-center gap-2 my-1 outer-step-control-container">
+                            <button type="button" class="btn btn-md btn-block btn-outline-secondary" id="reset-btn" disabled>
+                                <img src="{% static 'oral_message/img/double-arrow-left.svg' %}" alt="" width="20px" height="20px">
+                            </button>
+                            
+                            <button type="button" class="btn btn-md btn-block btn-outline-secondary" id="prev-btn" disabled>
+                                <img src="{% static 'oral_message/img/arrow-left.svg' %}" alt="" width="20px" height="20px">
+                            </button>
+
+                            <span id="outer-step-control" class="text-center fw-semibold fs-5 align-middle mx-1 p-1">-</span>
+
+                            <button type="button" class="btn btn-md btn-block btn-outline-secondary" id="next-btn" disabled>
+                                <img src="{% static 'oral_message/img/arrow-right.svg' %}" alt="" width="20px" height="20px">
+                            </button>
+
+                            <button type="button" class="btn btn-md btn-block btn-outline-secondary" id="skip-btn" disabled>
+                                <img src="{% static 'oral_message/img/double-arrow-right.svg' %}" alt="" width="20px" height="20px">
+                            </button>
+                        </div>
+
+                        <div class="container py-1 px-3 overflow-y-scroll text-center text-light fw-bold" style="height: 80%">
+                            
+                            <div class="row row-cols-2 g-2" id="result-container">
+                                <!-- Log Node S -->
+                                <!-- Log Node E -->
+                            </div>
+
+                        </div>
+
+                        <div class="text-center mt-1">
+                            <h5 id="konsensus-status"></h3>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+
+    <!-- Log Modal -->
+    <div class="modal fade" id="log0" tabindex="-1" aria-labelledby="log0Label" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="log0Label">Log Node X</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="log0content" style="height: 450px; overflow-y: scroll;">
+
+                </div>
+                <div class="modal-footer">
+                    <h5 id="log0Step" class=" ms-0 me-auto"></h5>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Warning Modal -->
+    <div class="modal fade" id="warn-modal-count" tabindex="-1" aria-labelledby="warnLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="warnLabel">Warning!</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="warncontent">
+                    Melebihi Batas Maksimum Total Node atau Byzantine Node (10).
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="warn-modal-byz1" tabindex="-1" aria-labelledby="warnLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="warnLabel">Warning!</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="warn-byz-content">
+                    Jumlah Byzantine Node maksimal 6. Lebih dari itu dapat membuat simulasi berjalan cukup lama.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="warn-modal-byz2" tabindex="-1" aria-labelledby="warnLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="warnLabel">Warning!</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="warn-byz-content">
+                    Jumlah Byzantine Node maksimal 2 untuk 10 node. Lebih dari itu dapat membuat simulasi berjalan sangat lama.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+  </body>
+  <script type="text/javascript" src="{% static 'oral_message/js/oral_message.js' %}"></script>
+</html>
